@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Black Cat Café — Mega Single File</title>
+
+<!-- ===========================
+     Internal CSS (colors, layout, animations)
+     =========================== -->
+<style>
+  :root{
+    --black:#0b0b0b;
+    --white:#fbfbf7;
+    --brown:#6b4f3a;
+    --warm-beige:#efe6db;
+    --muted:#9a8b80;
+    --accent:#2f2f2f;
+    --max-width:1100px;
+    --radius:12px;
+    --ease:cubic-bezier(.2,.9,.2,1);
+  }
+
+  /* Reset & base */
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial, serif;background:linear-gradient(180deg,var(--white),var(--warm-beige));color:var(--black);-webkit-font-smoothing:antialiased}
+  img{max-width:100%;height:auto;display:block}
+  a{color:inherit}
+  .container{width:94%;max-width:var(--max-width);margin:0 auto}
+
+  /* Header */
+  header{position:sticky;top:0;z-index:60;background:linear-gradient(180deg, rgba(11,11,11,0.96), rgba(11,11,11,0.88));backdrop-filter: blur(4px);}
+  .site-header{display:flex;align-items:center;justify-content:space-between;padding:0.9rem 0}
+  .brand{display:flex;align-items:center;gap:0.85rem}
+  .logo{
+    width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--brown),#8e6b51);
+    display:flex;align-items:center;justify-content:center;color:var(--white);font-weight:800;font-size:18px;box-shadow:0 8px 20px rgba(0,0,0,0.35);
+    transform-origin:center;
+    animation:logo-breathe 3.6s infinite ease-in-out;
+  }
+  @keyframes logo-breathe{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+  .brand h1{font-size:1.05rem;margin:0;color:var(--white);letter-spacing:.6px}
+  .brand .sub{font-size:0.75rem;color:rgba(255,255,255,0.8)}
+
+  /* nav */
+  .nav{display:flex;gap:0.9rem;align-items:center}
+  .nav a{color:var(--white);text-decoration:none;padding:0.45rem 0.6rem;border-radius:8px;transition:background .22s var(--ease)}
+  .nav a:hover{background:rgba(255,255,255,0.06)}
+  .nav a.active{box-shadow:inset 0 -3px 0 var(--brown)}
+  .hamburger{display:none;background:none;border:0;color:var(--white);font-size:1.4rem;cursor:pointer}
+
+  /* Main layout */
+  main{padding:1.4rem 0 3rem}
+  .hero{display:grid;grid-template-columns:1fr 460px;gap:1.8rem;align-items:center;padding:2.2rem 0}
+  .hero-card{background:var(--white);padding:1.6rem;border-radius:var(--radius);box-shadow:0 18px 40px rgba(0,0,0,0.08);transform:translateY(0);transition:transform .6s var(--ease), box-shadow .4s var(--ease)}
+  .hero-card:hover{transform:translateY(-6px);box-shadow:0 28px 60px rgba(0,0,0,0.12)}
+  .hero h2{margin:0 0 .5rem 0;font-size:2rem;line-height:1.05}
+  .hero p{color:var(--muted);margin-top:0.6rem;line-height:1.5}
+  .cta{margin-top:1rem;display:flex;gap:0.6rem;flex-wrap:wrap}
+  .btn{background:var(--black);color:var(--white);border:0;padding:0.6rem 1rem;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-block;transition:transform .18s var(--ease)}
+  .btn:active{transform:translateY(1px)}
+  .btn.secondary{background:transparent;border:1px solid rgba(0,0,0,0.06);color:var(--accent)}
+  .card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.1rem}
+  .card{background:var(--white);padding:1rem;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.05);opacity:0;transform:translateY(18px);transition:opacity .6s var(--ease), transform .6s var(--ease)}
+  .card.in-view{opacity:1;transform:translateY(0)}
+  .section-title{display:flex;align-items:end;justify-content:space-between;margin:1.2rem 0}
+  .small{font-size:0.95rem;color:var(--muted)}
+
+  /* hero photo w/ subtle parallax */
+  .hero-photo{border-radius:12px;overflow:hidden;height:100%;min-height:320px;box-shadow:0 12px 30px rgba(0,0,0,0.06);position:relative}
+  .hero-photo img{width:100%;height:100%;object-fit:cover;transform:translateY(0);transition:transform 0.9s var(--ease)}
+
+  /* menu & lists */
+  .menu-list{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+  .menu-item{display:flex;justify-content:space-between;padding:0.6rem 0;border-bottom:1px dashed #eee;align-items:center}
+  .menu-item img{width:86px;height:64px;object-fit:cover;border-radius:8px;margin-left:0.8rem;opacity:0;transform:translateX(14px);transition:opacity .6s var(--ease), transform .6s var(--ease)}
+  .menu-item.in-view img{opacity:1;transform:translateX(0)}
+
+  /* rooms */
+  .room-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+  .room{background:var(--white);padding:1rem;border-radius:10px;box-shadow:0 8px 22px rgba(0,0,0,0.06);display:flex;flex-direction:column;gap:0.6rem}
+  .room img{border-radius:8px;height:160px;object-fit:cover}
+
+  /* forms */
+  .form-row{display:flex;gap:0.6rem}
+  input,textarea,select{width:100%;padding:0.6rem;border-radius:8px;border:1px solid #e6e2dc;font:inherit}
+  .vintage-border{border:1px solid rgba(107,79,58,0.12);padding:0.6rem;border-radius:8px}
+
+  /* footer */
+  footer{background:var(--black);color:var(--white);padding:1.4rem 0;margin-top:2rem}
+  .footer-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.7rem}
+  .socials{display:flex;gap:0.6rem;align-items:center}
+  .social-btn{display:inline-flex;align-items:center;gap:0.5rem;background:transparent;border:1px solid rgba(255,255,255,0.06);padding:0.45rem 0.6rem;border-radius:8px;color:var(--white);text-decoration:none;transition:transform .16s var(--ease)}
+  .social-btn:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,0.18)}
+
+  /* small utility */
+  .text-center{text-align:center}
+  .muted{color:var(--muted)}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+  /* drawer */
+  .nav-drawer{position:fixed;right:0;top:0;height:100%;width:320px;background:var(--white);box-shadow:-12px 0 40px rgba(0,0,0,0.18);transform:translateX(110%);transition:transform .28s var(--ease);padding:1.2rem;z-index:80}
+  .nav-drawer.open{transform:translateX(0)}
+  .nav-drawer a{display:block;color:var(--black);padding:0.8rem 0;text-decoration:none}
+
+  /* reveal animations */
+  .fade-in{opacity:0;transform:translateY(14px);transition:opacity .6s var(--ease), transform .6s var(--ease)}
+  .fade-in.in-view{opacity:1;transform:translateY(0)}
+
+  /* responsiveness */
+  @media (max-width:1280px){
+    .hero{grid-template-columns:1fr 360px}
+    .card-grid{grid-template-columns:repeat(2,1fr)}
+    .room-grid{grid-template-columns:1fr}
+  }
+  @media (max-width:680px){
+    .site-header{padding:.6rem 0}
+    .nav{display:none}
+    .hamburger{display:block}
+    .hero{grid-template-columns:1fr;gap:1rem}
+    .hero-photo{min-height:220px}
+    .card-grid{grid-template-columns:1fr}
+    .menu-list{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="container site-header" role="banner">
+    <div class="brand" aria-hidden="false">
+      <div class="logo">
+      <a href="imgs/123.jpg"><img src="imgs/123.jpg"></a> </div>
+      <div>
+        <h1>Black Cat Café</h1>
+        <div class="sub">Cafe • Bookshop • Stay</div>
+      </div>
+    </div>
+
+    <nav class="nav" aria-label="Primary navigation">
+      <a href="#home" data-link class="active">Home</a>
+      <a href="#menu" data-link>Menu</a>
+      <a href="#about" data-link>About</a>
+      <a href="#stay" data-link>Stay</a>
+      <a href="#contact" data-link>Contact</a>
+    </nav>
+
+    <button class="hamburger" aria-label="Open menu" aria-expanded="false">☰</button>
+  </div>
+</header>
+
+<!-- Mobile drawer -->
+<aside class="nav-drawer" aria-hidden="true">
+  <a href="#home" data-link>Home</a>
+  <a href="#menu" data-link>Menu</a>
+  <a href="#about" data-link>About</a>
+  <a href="#stay" data-link>Stay</a>
+  <a href="#contact" data-link>Contact</a>
+</aside>
+
+<!-- Main App container (content injected by JS templates) -->
+<main class="container" id="app" role="main" tabindex="-1"></main>
+
+<!-- Footer (global) -->
+<footer>
+  <div class="container footer-row">
+    <div>© Black Cat Café — 2025 • 11 Wijerama Mawatha, Colombo 7</div>
+    <div class="socials">
+      <!-- Facebook -->
+      <a class="social-btn" href="https://www.facebook.com/blackcatcafe" target="_blank" rel="noopener noreferrer">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M22 12a10 10 0 10-11.5 9.9v-7h-2.2V12h2.2V9.8c0-2.2 1.3-3.4 3.2-3.4.9 0 1.9.16 1.9.16v2.1h-1.08c-1.06 0-1.39.66-1.39 1.34V12h2.36l-.38 2.9h-1.98v7A10 10 0 0022 12z"/></svg>
+        <span class="sr-only">Facebook</span>
+      </a>
+      <!-- Instagram -->
+      <a class="social-btn" href="https://www.instagram.com/blackcatcolombo/?hl=en" target="_blank" rel="noopener noreferrer">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 7.2a4.8 4.8 0 100 9.6 4.8 4.8 0 000-9.6zm6.4-.9a1.12 1.12 0 11-2.24 0 1.12 1.12 0 012.24 0zM12 5.8c2.29 0 2.57.01 3.48.05.9.04 1.38.2 1.7.34.43.18.74.41 1.06.73.32.32.55.63.73 1.06.14.32.3.8.34 1.7.04.91.05 1.19.05 3.48s-.01 2.57-.05 3.48c-.04.9-.2 1.38-.34 1.7-.18.43-.41.74-.73 1.06-.32.32-.63.55-1.06.73-.32.14-.8.3-1.7.34-.91.04-1.19.05-3.48.05s-2.57-.01-3.48-.05c-.9-.04-1.38-.2-1.7-.34-.43-.18-.74-.41-1.06-.73-.32-.32-.55-.63-.73-1.06-.14-.32-.3-.8-.34-1.7C5.81 14.57 5.8 14.29 5.8 12s.01-2.57.05-3.48c.04-.9.2-1.38.34-1.7.18-.43.41-.74.73-1.06.32-.32.63-.55 1.06-.73.32-.14.8-.3 1.7-.34C9.43 5.81 9.71 5.8 12 5.8z"/></svg>
+        <span class="sr-only">Instagram</span>
+      </a>
+      <!-- TripAdvisor -->
+      <a class="social-btn" href="https://www.tripadvisor.com/Hotel_Review-g293962-d9592621-Reviews-Black_Cat_Bed_and_Breakfast-Colombo_Western_Province.html" target="_blank" rel="noopener noreferrer">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C7.03 2 3 5.72 3 10.5c0 3.86 2.95 7.27 7 7.95v2.55h4v-2.55c4.05-.68 7-4.09 7-7.95C21 5.72 16.97 2 12 2zm0 2.3c2.87 0 5.2 1.64 5.2 3.66 0 2.02-2.33 3.66-5.2 3.66S6.8 10 6.8 8c0-2.02 2.33-3.66 5.2-3.66z"/></svg>
+        <span class="sr-only">TripAdvisor</span>
+      </a>
+    </div>
+  </div>
+</footer>
+
+
+<script type="text/template" id="tpl-home">
+  <section class="hero" aria-labelledby="home-title">
+    <div class="hero-card fade-in">
+      <h2 id="home-title">Slow coffee. Vintage corners. Cozy stays.</h2>
+      <p>Black Cat Café blends a soft vintage palette with clean, modern comfort. Drop by for a pour-over, browse second-hand books, or stay upstairs in our renovated colonial rooms.</p>
+      <div class="cta">
+        <a class="btn" href="#menu" data-link>See Menu</a>
+        <a class="btn secondary" href="#stay" data-link>Book a Room</a>
+      </div>
+
+      <div class="section-title">
+        <h3>Today's special</h3>
+        <div class="small">From a local roaster</div>
+      </div>
+
+      <div class="card-grid">
+        <article class="card"><h4 class="small">Latte — single origin</h4><p class="muted">Smooth, cocoa & spice notes. Served with a warm cookie.</p></article>
+        <article class="card"><h4 class="small">Scones & jam</h4><p class="muted">Baked daily using a traditional recipe.</p></article>
+        <article class="card"><h4 class="small">Reading nook</h4><p class="muted">Pick a book and drift away — shelves replenished weekly.</p></article>
+      </div>
+    </div>
+
+    <aside class="hero-photo" aria-hidden="false">
+      <img src="https://goodmarket-assets.s3.amazonaws.com/images/ea7097b2-0386-4d8d-ab72-d9cc813505cb.jpg" alt="Cozy corner at Black Cat Cafe">
+    </aside>
+  </section>
+
+  <section aria-labelledby="why-title">
+    <div class="section-title">
+      <h3 id="why-title">Why visitors love us</h3>
+      <div class="small">Curated. Quiet. Welcoming.</div>
+    </div>
+
+    <div class="card-grid">
+      <div class="card fade-in"><h4>Vintage, not pretentious</h4><p class="muted">Warm timber, soft linens and brass — restrained and welcoming.</p></div>
+      <div class="card fade-in"><h4>Locally sourced</h4><p class="muted">Coffee & pastries from nearby producers where possible.</p></div>
+      <div class="card fade-in"><h4>Pet friendly</h4><p class="muted">Well-behaved dogs welcome in the outdoor area.</p></div>
+    </div>
+  </section>
+</script>
+
+<script type="text/template" id="tpl-menu">
+<section aria-labelledby="menu-title">
+  <div class="section-title">
+    <h3 id="menu-title" style="font-size:3rem; letter-spacing:2px;">MENU</h3>
+    <div class="small">Savor our delightful café offerings</div>
+  </div>
+
+  <style>
+    .menu-scroll {
+      display: flex;
+      overflow-x: auto;
+      gap: 1.2rem;
+      padding: 0; /* no extra space */
+      margin-top: -8px; /* scrollbar hugs the card */
+      scroll-behavior: smooth;
+    }
+
+    /* Transparent scrollbar */
+    .menu-scroll::-webkit-scrollbar { height: 8px; }
+    .menu-scroll::-webkit-scrollbar-track { background: transparent; }
+    .menu-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); border-radius:10px; }
+    .menu-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.45); }
+
+    .menu-card {
+      min-width: 350px;
+      height: 550px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      font-family: 'Poppins', sans-serif;
+      transition: transform 0.3s ease;
+    }
+
+    .menu-card div {
+      width: 100%;
+      height: 500px;
+      overflow: hidden;
+      border-radius: 16px;
+      transition: height 0.4s ease;
+    }
+
+    .menu-card:hover div {
+      height: 520px; /* subtle expansion on hover */
+    }
+
+    .menu-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .menu-card:hover img {
+      transform: scale(1.08);
+    }
+
+    h5 { margin: 0.3rem 0 0.2rem 0; font-weight:600; font-size: 1.2rem; }
+    .price { font-size: 1rem; color: #5a4632; }
+  </style>
+
+  <!-- Coffee & Beverages -->
+  <h4 style="font-size:1.7rem; margin-top:1.5rem;">Coffee & Beverages</h4>
+  <div class="menu-scroll">
+    <article class="menu-card"><div><img src="https://www.sharmispassions.com/wp-content/uploads/2012/07/espresso-coffee-recipe04-500x375.jpg" alt="Espresso"></div><h5>Espresso</h5><div class="price">Small – Rs. 700 | Large – Rs. 900</div></article>
+    <article class="menu-card"><div><img src="https://www.acouplecooks.com/wp-content/uploads/2020/10/how-to-make-cappuccino-005.jpg" alt="Cappuccino"></div><h5>Cappuccino</h5><div class="price">Small – Rs. 850 | Large – Rs. 1100</div></article>
+    <article class="menu-card"><div><img src="https://myeverydaytable.com/wp-content/uploads/2025/04/Latte_0_7.jpg" alt="Latte"></div><h5>Latte</h5><div class="price">Small – Rs. 900 | Large – Rs. 1200</div></article>
+    <article class="menu-card"><div><img src="https://preppykitchen.com/wp-content/uploads/2025/02/Iced-Matcha-Latte-Feature.jpg" alt="Mocha"></div><h5>Mocha</h5><div class="price">Small – Rs. 950 | Large – Rs. 1300</div></article>
+    <article class="menu-card"><div><img src="https://imag.bonviveur.com/cafe-americano-en-la-taza.jpg" alt="Americano"></div><h5>Americano</h5><div class="price">Small – Rs. 750 | Large – Rs. 950</div></article>
+    <article class="menu-card"><div><img src="https://images.immediate.co.uk/production/volatile/sites/2/2021/11/Flat-White-d195a5f.png" alt="Flat White"></div><h5>Flat White</h5><div class="price">Small – Rs. 850 | Large – Rs. 1100</div></article>
+    <article class="menu-card"><div><img src="https://www.gourmetkava.cz/modules/ph_simpleblog/featured/77.jpg" alt="Macchiato"></div><h5>Macchiato</h5><div class="price">Small – Rs. 800 | Large – Rs. 1000</div></article>
+    <article class="menu-card"><div><img src="https://brewespressocoffee.com/wp-content/uploads/2022/03/Ristretto-in-Porcelain-Cup-with-Saucer-1200px.jpg.webp" alt="Ristretto"></div><h5>Ristretto</h5><div class="price">Small – Rs. 700 | Large – Rs. 900</div></article>
+    <article class="menu-card"><div><img src="https://foodal.com/wp-content/uploads/2015/02/Give-Me-a-Caf%C3%A9-au-Lait.jpg" alt="Café au Lait"></div><h5>Café au Lait</h5><div class="price">Small – Rs. 900 | Large – Rs. 1200</div></article>
+    <article class="menu-card"><div><img src="https://cdn.loveandlemons.com/wp-content/uploads/2025/07/affogato-1.jpg" alt="Affogato"></div><h5>Affogato</h5><div class="price">Small – Rs. 950 | Large – Rs. 1300</div></article>
+  </div>
+
+  <!-- Cakes & Pastries -->
+  <h4 style="font-size:1.7rem; margin-top:1.5rem;">Cakes & Pastries</h4>
+  <div class="menu-scroll">
+    <article class="menu-card"><div><img src="https://sarahsvegankitchen.com/wp-content/uploads/2024/05/Vegan-Croissants-1.jpg" alt="Croissant"></div><h5>Croissant</h5><div class="price">Rs. 550</div></article>
+    <article class="menu-card"><div><img src="https://baranbakery.com/wp-content/uploads/2022/07/Vanilla-Muffins-14.jpg" alt="Muffin"></div><h5>Muffin</h5><div class="price">Rs. 500</div></article>
+    <article class="menu-card"><div><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGLb_fuwV5fZRf8ijdk0yaTVnEZ3MiCrI1YIhmYhMNhtZZqJWo4gi9pYbSCmw5yNyG0UU&usqp=CAU" alt="Danish"></div><h5>Danish</h5><div class="price">Rs. 600</div></article>
+    <article class="menu-card"><div><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRBVWDw1mYPYZpunq2zg4smOx-9xHE8VdDjZrnvQc7SBEEGfYvkl_smZaKU_eJYS0fjHSE&usqp=CAU" alt="Brownie"></div><h5>Brownie</h5><div class="price">Rs. 650</div></article>
+    <article class="menu-card"><div><img src="https://butternutbakeryblog.com/wp-content/uploads/2020/04/cheesecake-slice.jpg" alt="Cheesecake"></div><h5>Cheesecake</h5><div class="price">Rs. 950</div></article>
+    <article class="menu-card"><div><img src="https://www.modernhoney.com/wp-content/uploads/2017/04/Fruit-Tart-Recipe-8-500x500.jpg" alt="Fruit Tart"></div><h5>Fruit Tart</h5><div class="price">Rs. 800</div></article>
+    <article class="menu-card"><div><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTj2ktJBV7cPMOzleddJ-f1ru4zqi8WFdFiOw&s" alt="Eclair"></div><h5>Eclair</h5><div class="price">Rs. 700</div></article>
+    <article class="menu-card"><div><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRpiRjt4A-TRZSmORiY_YiHwruO-I1TBpw42A&s" alt="Tiramisu"></div><h5>Tiramisu</h5><div class="price">Rs. 950</div></article>
+    <article class="menu-card"><div><img src="https://handletheheat.com/wp-content/uploads/2024/02/chocolate-chip-scones-SQUARE.jpg" alt="Scone"></div><h5>Scone</h5><div class="price">Rs. 600</div></article>
+    <article class="menu-card"><div><img src="https://myislandbistrokitchen.com/wp-content/uploads/2020/06/DSC_0785-2.jpg" alt="Panna Cotta"></div><h5>Panna Cotta</h5><div class="price">Rs. 900</div></article>
+  </div>
+</section>
+</script>
+
+
+
+
+
+<script type="text/template" id="tpl-about">
+<section aria-labelledby="about-title" style="font-family:'Inter',sans-serif; padding:2rem 0;">
+  <div class="section-title" style="text-align:center; margin-bottom:3rem;">
+    <h3 id="about-title" style="font-size:2.8rem; font-weight:700; margin:0 0 0.5rem 0;">Our Story</h3>
+    <div style="font-size:1rem; color:#6b4f3a;">A small cafe with a big heart</div>
+  </div>
+
+  <style>
+    .about-card {
+      position: relative;
+      width: 90%;
+      max-width: 1000px;
+      margin: 2rem auto;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: left;
+    }
+
+    .about-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    .about-card img {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+      border-bottom: 1px solid #eee;
+    }
+
+    .about-card:hover img {
+      transform: scale(1.08);
+    }
+
+    .about-card-title {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      color: #fff;
+      font-size: 3rem;
+      font-weight: 800;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+    }
+
+    .about-description {
+      width: 90%;
+      padding: 1rem 0 2rem 0;
+      font-size: 1rem;
+      color: #9a8b80;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+      margin-top: 0.5rem;
+    }
+
+    .about-description.open {
+      max-height: 400px;
+    }
+  </style>
+
+  <!-- History -->
+  <div class="about-card" onclick="this.querySelector('.about-description').classList.toggle('open')">
+    <div class="about-card-title">History</div>
+    <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/16/8a/67/da/photo0jpg.jpg?w=1200&h=1200&s=1" alt="Cafe history">
+    <p class="about-description">Black Cat Café started in a renovated colonial villa in Colombo 7. Originally a small book club, it soon became a cozy café inviting all visitors to relax and explore.</p>
+  </div>
+
+  <!-- Bookshop -->
+  <div class="about-card" onclick="this.querySelector('.about-description').classList.toggle('open')">
+    <div class="about-card-title">Bookshop</div>
+    <img src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2e/8e/d1/5f/caption.jpg?w=1100&h=1100&s=1" alt="Bookshop">
+    <p class="about-description">Our second-hand bookshop is curated with fiction, photography, and art books. Perfect corners for readers to get lost in stories while sipping coffee.</p>
+  </div>
+
+  <!-- Design -->
+  <div class="about-card" onclick="this.querySelector('.about-description').classList.toggle('open')">
+    <div class="about-card-title">Design</div>
+    <img src="https://media-cdn.tripadvisor.com/media/photo-s/0f/0a/ec/19/black-cat-bed-and-breakfast.jpg" alt="Design">
+    <p class="about-description">Black, white, and warm brown tones define our minimal vintage aesthetic. Each corner is designed for comfort and visual delight.</p>
+  </div>
+
+  <!-- Experience -->
+  <div class="about-card" onclick="this.querySelector('.about-description').classList.toggle('open')">
+    <div class="about-card-title">Experience</div>
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbMWtgK1p-aZGYIkZ31bqw_g3HpA2v7K-aFyO3YCpn0Cd2qqRmNNwYOyg87qCv167ut4o&usqp=CAU" alt="Experience">
+    <p class="about-description">Visitors enjoy curated coffee, pastries, and a quiet reading nook. Vintage corners, soft lighting, and local music complete the cozy atmosphere.</p>
+  </div>
+</section>
+</script>
+
+
+<script type="text/template" id="tpl-stay">
+<section aria-labelledby="stay-title">
+  <div class="section-title" style="text-align:center; margin-bottom:1.5rem;">
+    <h3 id="stay-title" style="font-size:2.5rem; font-weight:bold;">Rooms & Booking</h3>
+    <div class="small" style="font-size:1rem; color:#666;">Boutique accommodations above the café</div>
+  </div>
+
+  <div class="room-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;">
+    
+    <!-- King Room -->
+    <article class="room fade-in" style="border-radius:10px; overflow:hidden; box-shadow:0 4px 8px rgba(0,0,0,0.1);">
+      <img src="https://a0.muscache.com/im/pictures/hosting/Hosting-10526991/original/7e92e6f0-5f61-4d0a-bd32-bd3f9641a53b.jpeg?im_w=1200" alt="Cosy Room" style="width:100%;height:220px;object-fit:cover;">
+      <div style="padding:0.8rem;">
+      <h4>King Room</h4> <p class="muted">Spacious room with a king-sized bed, private bathroom, and air conditioning. Perfect for couples or solo travelers.</p> <div class="muted">From LKR 9,500 / night</div> <div style="margin-top:0.6rem"> <a class="btn" href="#booking" data-link>Request booking</a> </div> </div> </article>
+
+    <!-- Cosy Room -->
+    <article class="room fade-in" style="border-radius:10px; overflow:hidden; box-shadow:0 4px 8px rgba(0,0,0,0.1);">
+      <img src="https://a0.muscache.com/im/pictures/prohost-api/Hosting-10555553/original/5bd24e71-7d2b-4bf4-b025-aabab95bf75f.jpeg?im_w=1200" alt="Cosy Room" style="width:100%;height:220px;object-fit:cover;">
+      <div style="padding:0.8rem;">
+        <h4>Cosy Room</h4>
+        <p class="muted">A charming, intimate space perfect for solo travelers or couples. Comfortable bed and modern amenities included.</p>
+        <div class="muted">From LKR 6,500 / night</div>
+        <div style="margin-top:0.6rem">
+          <a class="btn" href="#booking" data-link>Request booking</a>
+        </div>
+      </div>
+    </article>
+
+  </div>
+
+  <div id="booking" class="card fade-in" style="margin-top:1rem">
+    <h4>Booking Request</h4>
+    <form id="booking-form" novalidate>
+      <div class="form-row">
+        <input name="name" placeholder="Full name" required>
+        <input name="email" placeholder="Email" type="email" required>
+      </div>
+      <div class="form-row" style="margin-top:0.6rem">
+        <input name="checkin" type="date" aria-label="Check-in date">
+        <input name="checkout" type="date" aria-label="Check-out date">
+      </div>
+      <div style="margin-top:0.6rem">
+        <select name="room">
+          <option>King Room</option>
+          <option>Cosy Room</option>
+        </select>
+      </div>
+      <div style="margin-top:0.6rem">
+        <button class="btn" type="submit">Send request</button>
+      </div>
+    </form>
+  </div>
+</section>
+</script>
+
+
+
+<script type="text/template" id="tpl-contact">
+<section aria-labelledby="contact-title" style="font-family:'Inter',sans-serif; padding:2rem 0;">
+  <div class="section-title" style="text-align:center; margin-bottom:2rem;">
+    <h3 id="contact-title" style="font-size:2.4rem; margin:0 0 0.5rem 0; font-weight:700;">Contact & Hours</h3>
+    <div style="font-size:1rem; color:#6b4f3a;">Find us in Colombo 7</div>
+  </div>
+
+  <div class="contact-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.5rem;">
+
+    <!-- Address -->
+    <div class="card fade-in" style="display:flex; align-items:start; gap:1rem; padding:1.2rem; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.08);">
+      <img src="https://img.icons8.com/ios-filled/50/000000/marker.png" alt="Address icon" style="width:28px; height:28px; flex-shrink:0;">
+      <div>
+        <h4 style="margin:0 0 0.3rem 0; font-size:1.2rem; font-weight:600;">Address</h4>
+        <p style="margin:0; color:#9a8b80;">11 Wijerama Mawatha, Colombo 7</p>
+      </div>
+    </div>
+
+    <!-- Phone -->
+    <div class="card fade-in" style="display:flex; align-items:start; gap:1rem; padding:1.2rem; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.08);">
+      <img src="https://img.icons8.com/ios-filled/50/000000/phone.png" alt="Phone icon" style="width:28px; height:28px; flex-shrink:0;">
+      <div>
+        <h4 style="margin:0 0 0.3rem 0; font-size:1.2rem; font-weight:600;">Phone</h4>
+        <p style="margin:0; color:#9a8b80;">+94 11 267 5111</p>
+      </div>
+    </div>
+
+    <!-- Email -->
+    <div class="card fade-in" style="display:flex; align-items:start; gap:1rem; padding:1.2rem; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.08);">
+      <img src="https://img.icons8.com/ios-filled/50/000000/new-post.png" alt="Email icon" style="width:28px; height:28px; flex-shrink:0;">
+      <div>
+        <h4 style="margin:0 0 0.3rem 0; font-size:1.2rem; font-weight:600;">Email</h4>
+        <p style="margin:0; color:#9a8b80;">blackcatcafe@gmail.com</p>
+      </div>
+    </div>
+
+    <!-- Social Media -->
+    <div class="card fade-in" style="display:flex; align-items:start; gap:1rem; padding:1.2rem; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.08);">
+      <img src="https://img.icons8.com/ios-filled/50/000000/facebook-new.png" alt="Social icon" style="width:28px; height:28px; flex-shrink:0;">
+      <div>
+        <h4 style="margin:0 0 0.3rem 0; font-size:1.2rem; font-weight:600;">Social Media</h4>
+        <p style="margin:0; color:#9a8b80;">
+          <a href="https://www.facebook.com/blackcatcafe" target="_blank" style="color:#000; text-decoration:none;">Facebook</a> • 
+          <a href="https://www.instagram.com/blackcatcolombo/?hl=en" target="_blank" style="color:#000; text-decoration:none;">Instagram</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Google Map -->
+    <div class="card fade-in" style="grid-column:1/-1; height:300px; border-radius:12px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.08);">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.225682207876!2d79.84142721525898!3d6.907340795006927!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae2590f09bfa9b1%3A0x1a5b23b2d2d60a2c!2sBlack%20Cat%20Cafe!5e0!3m2!1sen!2slk!4v1696335766231!5m2!1sen!2slk" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    </div>
+
+  </div>
+
+  <!-- Contact Form -->
+  <div style="margin-top:2rem; display:flex; justify-content:center;">
+    <div style="width:100%; max-width:600px;">
+      <div class="card vintage-border fade-in" style="padding:1.5rem; border-radius:12px;">
+        <h4 style="margin-bottom:0.8rem; font-size:1.6rem; font-weight:600;">Send us a note</h4>
+        <form id="contact-form" novalidate style="display:flex; flex-direction:column; gap:0.8rem;">
+          <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+            <input name="name" placeholder="Your name" required style="flex:1; padding:0.6rem; border-radius:8px; border:1px solid #e6e2dc; font-family:'Inter',sans-serif;">
+            <input name="email" placeholder="Your email" type="email" required style="flex:1; padding:0.6rem; border-radius:8px; border:1px solid #e6e2dc; font-family:'Inter',sans-serif;">
+          </div>
+          <textarea name="message" rows="4" placeholder="Message" style="padding:0.6rem; border-radius:8px; border:1px solid #e6e2dc; font-family:'Inter',sans-serif;"></textarea>
+          <button class="btn" type="submit" style="align-self:flex-start;">Send</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</section>
+</script>
+
+
+<!-- ===========================
+     Internal JavaScript — routing, interactivity, animations
+     =========================== -->
+<script>
+(function(){
+  // Elements & templates
+  const app = document.getElementById('app');
+  const templates = {
+    home: document.getElementById('tpl-home').textContent,
+    menu: document.getElementById('tpl-menu').textContent,
+    about: document.getElementById('tpl-about').textContent,
+    stay: document.getElementById('tpl-stay').textContent,
+    contact: document.getElementById('tpl-contact').textContent
+  };
+
+  // Render route based on location.hash
+  function renderRoute(){
+    const raw = (location.hash || '#home').replace('#','');
+    const route = raw || 'home';
+    app.innerHTML = templates[route] || templates.home;
+    document.title = 'Black Cat Café — ' + capitalize(route);
+    // set active nav
+    document.querySelectorAll('[data-link]').forEach(a=>{
+      const target = (a.getAttribute('href')||'#home').replace('#','') || 'home';
+      a.classList.toggle('active', target === route);
+    });
+    // focus main for a11y
+    app.focus();
+    // Attach interactions to newly injected content
+    attachHandlers();
+    // Trigger scroll reveal
+    runScrollReveal();
+    // Slight hero parallax tweak
+    heroParallax();
+  }
+
+  function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1) }
+
+  // Attach form handlers and small behaviors
+  function attachHandlers(){
+    // booking form
+    const booking = document.getElementById('booking-form');
+    if(booking){
+      booking.addEventListener('submit', function(e){
+        e.preventDefault();
+        const name = booking.querySelector('[name="name"]').value.trim();
+        const email = booking.querySelector('[name="email"]').value.trim();
+        const checkin = booking.querySelector('[name="checkin"]').value;
+        const checkout = booking.querySelector('[name="checkout"]').value;
+        if(!name || !email){ alert('Please enter name and email.'); return; }
+        if(checkin && checkout && (new Date(checkout) <= new Date(checkin))){ alert('Check-out must be after check-in.'); return; }
+        // Demo success
+        toast('Booking request sent — demo only. We will contact you.');
+        booking.reset();
+        location.hash = '#home';
+      });
+    }
+
+    // contact form
+    const contact = document.getElementById('contact-form');
+    if(contact){
+      contact.addEventListener('submit', function(e){
+        e.preventDefault();
+        const name = contact.querySelector('[name="name"]').value.trim();
+        const email = contact.querySelector('[name="email"]').value.trim();
+        if(!name || !email){ alert('Please enter name and email.'); return; }
+        toast('Message sent — demo only. Thank you!');
+        contact.reset();
+        location.hash = '#home';
+      });
+    }
+
+    // smooth link clicks (within SPA)
+    document.querySelectorAll('[data-link]').forEach(a=>{
+      a.addEventListener('click', function(e){
+        // Let hashchange handle route; drawer links close immediately
+        if(a.closest('.nav-drawer')){
+          closeDrawer();
+        }
+      });
+    });
+  }
+
+  // Tiny toast (non-blocking) notifications
+  function toast(message, ms=3000){
+    const t = document.createElement('div');
+    t.textContent = message;
+    t.style.position = 'fixed';
+    t.style.bottom = '18px';
+    t.style.left = '50%';
+    t.style.transform = 'translateX(-50%)';
+    t.style.background = 'rgba(11,11,11,0.92)';
+    t.style.color = '#fff';
+    t.style.padding = '10px 14px';
+    t.style.borderRadius = '10px';
+    t.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
+    t.style.zIndex = 120;
+    t.style.opacity = 0;
+    t.style.transition = 'opacity .28s ease, transform .28s ease';
+    document.body.appendChild(t);
+    requestAnimationFrame(()=>{ t.style.opacity = 1; t.style.transform = 'translateX(-50%) translateY(-4px)'; });
+    setTimeout(()=>{ t.style.opacity = 0; t.style.transform = 'translateX(-50%) translateY(0)'; setTimeout(()=>t.remove(),320); }, ms);
+  }
+
+  // Scroll reveal using IntersectionObserver
+  function runScrollReveal(){
+    const items = app.querySelectorAll('.fade-in, .card, .menu-item, .menu-item img, .room, .card-grid .card');
+    const io = new IntersectionObserver((entries, obs) => {
+      entries.forEach(e=>{
+        if(e.isIntersecting){
+          e.target.classList.add('in-view');
+          obs.unobserve(e.target);
+        }
+      });
+    }, {threshold: 0.12});
+    items.forEach(it => io.observe(it));
+  }
+
+  // Parallax effect for hero image on scroll
+  function heroParallax(){
+    const heroImg = app.querySelector('.hero-photo img');
+    if(!heroImg) return;
+    function onScroll(){
+      const rect = heroImg.getBoundingClientRect();
+      const windowH = window.innerHeight;
+      // compute a small transform when element is partly visible
+      const visible = Math.max(0, Math.min(1, (windowH - rect.top) / (windowH + rect.height)));
+      heroImg.style.transform = `translateY(${(visible - 0.5) * -10}px) scale(${1 + visible*0.01})`;
+    }
+    onScroll();
+    window.addEventListener('scroll', onScroll, {passive:true});
+    // cleanup when route changes: we leave handler (lightweight)
+  }
+
+  // Mobile nav drawer behavior
+  const ham = document.querySelector('.hamburger');
+  const drawer = document.querySelector('.nav-drawer');
+  if(ham && drawer){
+    ham.addEventListener('click', ()=> {
+      const isOpen = drawer.classList.toggle('open');
+      ham.setAttribute('aria-expanded', String(isOpen));
+      drawer.setAttribute('aria-hidden', String(!isOpen));
+    });
+    drawer.querySelectorAll('a').forEach(a=> a.addEventListener('click', ()=> {
+      drawer.classList.remove('open');
+      ham.setAttribute('aria-expanded','false'); drawer.setAttribute('aria-hidden','true');
+      // allow hashchange to run route
+    }));
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ closeDrawer(); }});
+  }
+
+  function closeDrawer(){ drawer.classList.remove('open'); ham.setAttribute('aria-expanded','false'); drawer.setAttribute('aria-hidden','true'); }
+
+  // Router: listen to hash changes
+  window.addEventListener('hashchange', renderRoute);
+  // Initial render
+  renderRoute();
+
+  // Accessibility: skip to main on load
+  window.addEventListener('load', ()=>{ const m = document.getElementById('app'); if(m) m.setAttribute('tabindex','-1'); });
+
+})();
+</script>
+
+</body>
+</html>

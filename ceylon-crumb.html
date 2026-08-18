@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ceylon Crumb — Sri Lankan Cake Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#a9b596;
+    --sage-dark:#8fa079;
+    --cream:#faf5ea;
+    --cream-deep:#f3ead9;
+    --coral:#f0a583;
+    --coral-dark:#e78c62;
+    --ink:#3c3529;
+    --ink-soft:#6b6252;
+    --line:#e3d9c4;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Jost',sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;letter-spacing:-0.01em;}
+  a{text-decoration:none;color:inherit;}
+  ul{list-style:none;}
+  img.placeholder{width:100%;height:100%;object-fit:cover;display:block;}
+
+  /* image class — now used on real <img> tags */
+  .imgph{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    background:#d8c9b4;
+  }
+
+  /* NAV */
+  header{
+    position:relative;
+    z-index:20;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:28px 6%;
+    background:var(--sage);
+  }
+  .logo{font-family:'Fraunces',serif;font-style:italic;font-size:1.5rem;font-weight:600;color:var(--ink);letter-spacing:0.01em;}
+  nav ul{display:flex;gap:38px;font-size:.95rem;font-weight:400;}
+  nav a{position:relative;padding:4px 0;}
+  nav a:after{content:"";position:absolute;left:0;bottom:-3px;width:0;height:1px;background:var(--ink);transition:width .25s;}
+  nav a:hover:after{width:100%;}
+  .nav-icons{display:flex;gap:20px;align-items:center;}
+  .nav-icons svg{width:19px;height:19px;stroke:var(--ink);}
+  .burger{display:none;background:none;border:none;cursor:pointer;padding:0;}
+  .burger svg{width:22px;height:22px;stroke:var(--ink);}
+
+  /* MOBILE NAV PANEL */
+  .mobile-nav{
+    position:fixed;top:0;right:0;height:100%;width:min(78vw,320px);
+    background:var(--cream);z-index:40;
+    transform:translateX(100%);transition:transform .35s ease;
+    box-shadow:-8px 0 30px rgba(0,0,0,.12);
+    padding:90px 34px 40px;
+  }
+  .mobile-nav.open{transform:translateX(0);}
+  .mobile-nav ul{display:flex;flex-direction:column;gap:26px;}
+  .mobile-nav a{font-family:'Fraunces',serif;font-size:1.3rem;}
+  .mobile-nav-close{position:absolute;top:28px;right:28px;background:none;border:none;cursor:pointer;}
+  .mobile-nav-close svg{width:22px;height:22px;stroke:var(--ink);}
+  .mobile-overlay{
+    position:fixed;inset:0;background:rgba(30,26,18,.35);z-index:30;
+    opacity:0;visibility:hidden;transition:opacity .35s ease;
+  }
+  .mobile-overlay.open{opacity:1;visibility:visible;}
+
+  /* HERO */
+  .hero{
+    position:relative;
+    background:var(--sage);
+    display:flex;
+    align-items:stretch;
+    height:680px;
+    overflow:hidden;
+  }
+  .hero-text{
+    flex:0 0 50%;
+    max-width:50%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:70px 6% 70px 6%;
+  }
+  .hero-text h1{
+    font-size:3.2rem;
+    line-height:1.15;
+    color:var(--ink);
+    margin-bottom:22px;
+  }
+  .hero-text h1 em{font-style:italic;font-weight:600;color:#a8431f;}
+  .hero-text p{
+    color:#4c4736;
+    font-size:1rem;
+    max-width:400px;
+    margin-bottom:32px;
+    line-height:1.6;
+  }
+  .btn{
+    display:inline-block;
+    background:var(--coral);
+    color:#fff;
+    padding:15px 34px;
+    border-radius:40px;
+    font-size:.9rem;
+    letter-spacing:.03em;
+    border:none;
+    cursor:pointer;
+    transition:background .2s, transform .2s;
+  }
+  .btn:hover{background:var(--coral-dark);transform:translateY(-2px);}
+  .hero-img{
+    flex:0 0 50%;
+    max-width:50%;
+    height:100%;
+  }
+  .hero-img .imgph{
+    width:100%;
+    height:100%;
+    background:#d7d0be;
+    border:none;
+  }
+
+  .wave{
+    position:absolute;
+    bottom:-2px;left:0;width:100%;
+    line-height:0;
+  }
+  .wave svg{width:100%;height:110px;display:block;}
+
+  /* SECTION HEADINGS */
+  .section{padding:100px 6% 40px;}
+  .section-title{
+    text-align:center;
+    font-size:2.3rem;
+    margin-bottom:60px;
+    color:var(--ink);
+  }
+  .eyebrow{
+    display:block;
+    text-align:center;
+    font-family:'Jost',sans-serif;
+    font-size:.8rem;
+    font-weight:500;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--coral-dark);
+    margin-bottom:10px;
+  }
+
+  /* PRODUCT RANGE */
+  .range{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:26px;
+    max-width:1180px;
+    margin:0 auto;
+    padding-bottom:100px;
+  }
+  .range-card{
+    border-radius:22px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .range-card.text-card{
+    border:1.5px solid var(--line);
+    background:var(--cream);
+    padding:40px 30px;
+    justify-content:center;
+    text-align:center;
+  }
+  .range-card.text-card h3{font-size:1.4rem;margin-bottom:14px;}
+  .range-card.text-card p{color:var(--ink-soft);font-size:.9rem;line-height:1.7;margin-bottom:26px;}
+  .range-card .imgph{height:260px;border-radius:0;}
+  .range-caption{
+    background:#fff;
+    padding:16px 20px;
+    font-size:.92rem;
+    font-weight:500;
+    border:1px solid var(--line);
+    border-top:none;
+    text-align:center;
+  }
+
+  /* FEATURED / FESTIVE */
+  .festive{
+    display:flex;
+    align-items:center;
+    gap:70px;
+    max-width:1100px;
+    margin:0 auto;
+    padding:60px 6% 120px;
+    flex-wrap:wrap;
+  }
+  .festive-img .imgph{
+    width:340px;height:340px;
+    border-radius:50%;
+  }
+  .festive-text{flex:1 1 320px;max-width:460px;}
+  .festive-text .eyebrow{text-align:left;}
+  .festive-text h2{font-size:2rem;margin-bottom:16px;}
+  .festive-text h2 .accent{color:var(--coral-dark);font-style:italic;}
+  .festive-text p{color:var(--ink-soft);line-height:1.7;margin-bottom:30px;max-width:400px;}
+  .festive-actions{display:flex;align-items:center;gap:30px;}
+  .learn-link{color:var(--coral-dark);font-weight:500;border-bottom:1px solid var(--coral-dark);padding-bottom:2px;}
+
+  /* PROCESS / PREP */
+  .prep{
+    position:relative;
+    background:var(--sage);
+    margin-top:40px;
+    padding:110px 6% 140px;
+    display:flex;
+    gap:60px;
+    align-items:center;
+    flex-wrap:wrap;
+    overflow:hidden;
+  }
+  .prep-wave-top{position:absolute;top:-2px;left:0;width:100%;line-height:0;transform:rotate(180deg);}
+  .prep-wave-top svg{width:100%;height:110px;display:block;}
+  .prep-list{flex:0 0 44%;max-width:44%;position:relative;z-index:2;}
+  .prep-list h3{font-size:1.7rem;margin-bottom:26px;}
+  .prep-list li{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:16px;
+    font-size:.95rem;
+    color:#40402c;
+  }
+  .prep-list li svg{flex:0 0 auto;width:18px;height:18px;margin-top:3px;stroke:var(--coral-dark);}
+  .prep-image{
+    flex:0 0 50%;
+    max-width:50%;
+    position:relative;
+    z-index:2;
+  }
+  .prep-image .imgph{
+    width:100%;
+    height:480px;
+    border-radius:0 26px 26px 0;
+    clip-path:polygon(
+      6% 0%, 100% 0%, 100% 100%, 4% 100%,
+      9% 92%, 2% 85%, 8% 76%, 3% 68%,
+      10% 60%, 1% 52%, 7% 44%, 2% 36%,
+      9% 28%, 3% 20%, 8% 12%, 0% 6%
+    );
+  }
+
+  footer{
+    background:var(--cream-deep);
+    padding:34px 6%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:16px;
+    font-size:.82rem;
+    color:var(--ink-soft);
+    border-top:1px solid var(--line);
+  }
+  .footer-social{display:flex;gap:16px;}
+  .footer-social svg{width:18px;height:18px;stroke:var(--ink-soft);}
+
+  /* TABLET: hero stays side-by-side, image narrows to 45-50% */
+  @media(max-width:900px) and (min-width:601px){
+    .hero{height:auto;min-height:560px;}
+    .hero-text{flex:0 0 55%;max-width:55%;padding:60px 5% 60px 6%;}
+    .hero-img{flex:0 0 45%;max-width:45%;height:auto;min-height:420px;}
+    .hero-text h1{font-size:2.6rem;}
+    nav ul{display:none;}
+  }
+
+  /* MOBILE: image drops full-width below the text */
+  @media(max-width:600px){
+    .hero{flex-wrap:wrap;height:auto;}
+    .hero-text{flex:1 1 100%;max-width:100%;padding:50px 6% 30px;}
+    .hero-img{flex:1 1 100%;max-width:100%;height:320px;}
+    nav ul{display:none;}
+    .burger{display:block;}
+    .hero-text h1{font-size:2.2rem;}
+  }
+  @media(min-width:601px) and (max-width:900px){
+    .burger{display:block;}
+  }
+
+  @media(max-width:900px){
+    .range{grid-template-columns:1fr;}
+    .festive{flex-direction:column;text-align:center;}
+    .festive-text .eyebrow, .festive-actions{justify-content:center;}
+    .festive-text p{margin-left:auto;margin-right:auto;}
+    .prep{flex-direction:column;text-align:center;}
+    .prep-list{flex:1 1 100%;max-width:100%;}
+    .prep-image{flex:1 1 100%;max-width:100%;}
+    .prep-image .imgph{height:320px;}
+    .prep-list li{justify-content:center;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Ceylon Crumb</div>
+  <nav>
+    <ul>
+      <li><a href="#home">Home</a></li>
+      <li><a href="#cakes">Cakes ▾</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#shop">Shop</a></li>
+    </ul>
+  </nav>
+  <div class="nav-icons">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <button class="burger" id="burgerBtn" aria-label="Open menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-overlay" id="mobileOverlay"></div>
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+  </button>
+  <ul>
+    <li><a href="#home">Home</a></li>
+    <li><a href="#cakes">Cakes</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#shop">Shop</a></li>
+  </ul>
+</div>
+
+<section class="hero" id="home">
+  <div class="hero-text">
+    <h1>We Craft Ceylon's <em>Finest</em> Cake Stories</h1>
+    <p>Handmade in Colombo with real butter, Ceylon cinnamon and cashew — traditional love cakes and modern celebration bakes, made to order for every occasion.</p>
+    <a href="#" class="btn">Order Now</a>
+  </div>
+  <div class="hero-img">
+    <img class="imgph" src="junk/cake img.png" alt="Signature chocolate cake on a plate">
+  </div>
+  <div class="wave">
+    <svg viewBox="0 0 1440 110" preserveAspectRatio="none"><path fill="#faf5ea" d="M0,64 C240,110 480,0 720,32 C960,64 1200,110 1440,54 L1440,110 L0,110 Z"/></svg>
+  </div>
+</section>
+
+<section class="section" id="cakes">
+  <span class="eyebrow">what we bake</span>
+  <h2 class="section-title">Our Cake Range</h2>
+  <div class="range">
+    <div class="range-card text-card">
+      <h3>Bespoke Celebration Cakes</h3>
+      <p>Weddings, birthdays and homecomings — custom flavours, tiers and designs built around your day.</p>
+      <a href="#" class="btn">Enquire for Custom Orders</a>
+    </div>
+    <div class="range-card">
+      <img class="imgph" src="https://commons.wikimedia.org/wiki/Special:FilePath/Delicious_slice_of_cake_with_cream.jpg?width=700" alt="Ceylon tea and cardamom sponge cake slice">
+      <div class="range-caption">Ceylon Tea &amp; Cardamom Cake</div>
+    </div>
+    <div class="range-card">
+      <img class="imgph" src="https://commons.wikimedia.org/wiki/Special:FilePath/Vegan_Olive_Oil_Rosemary_Semolina_Cake_(5552277248).jpg?width=700" alt="Traditional Sri Lankan love cake slice">
+      <div class="range-caption">Classic Sri Lankan Love Cake</div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="shop" style="padding-top:20px;">
+  <div class="festive">
+    <div class="festive-img">
+      <img class="imgph" src="https://commons.wikimedia.org/wiki/Special:FilePath/8_Texture_Chocolate_Cake.jpg?width=800" alt="Kithul treacle chocolate cake">
+    </div>
+    <div class="festive-text">
+      <span class="eyebrow" style="margin-left:0;">seasonal favourite</span>
+      <h2>Kithul <span class="accent">Treacle</span> Chocolate Delight</h2>
+      <p>Dark chocolate sponge layered with kithul treacle ganache — our most-loved festive order every Avurudu and Christmas season.</p>
+      <div class="festive-actions">
+        <a href="#" class="btn">Order</a>
+        <a href="#" class="learn-link">Learn more →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="prep" id="about">
+  <div class="prep-wave-top">
+    <svg viewBox="0 0 1440 110" preserveAspectRatio="none"><path fill="#faf5ea" d="M0,64 C240,110 480,0 720,32 C960,64 1200,110 1440,54 L1440,110 L0,110 Z"/></svg>
+  </div>
+  <div class="prep-list">
+    <h3>How We Bake</h3>
+    <ul>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Fresh Ceylon cinnamon &amp; cashew, sourced weekly</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Small-batch baking, no preservatives</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Island-wide delivery from our Colombo kitchen</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Custom orders for weddings &amp; events</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Eggless &amp; gluten-free options available</li>
+    </ul>
+  </div>
+  <div class="prep-image">
+    <img class="imgph" src="https://commons.wikimedia.org/wiki/Special:FilePath/Fitting_the_cake_to_the_marzipan_(11029787414).jpg?width=900" alt="Baker's hands finishing a cake">
+  </div>
+</section>
+
+<footer>
+  <div>© 2026 Ceylon Crumb — Colombo, Sri Lanka</div>
+  <div class="footer-social">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M22 4s-.7 2.1-2 3.4c1.6 9.4-8.4 16.2-16.6 11.3 2.9.2 5.8-.8 7.9-2.7-3.2-.1-5.7-2.2-6.6-5 1 .2 2 .1 2.9-.2C4.2 10.1 2.7 7.9 2.7 5.4c1 .5 2.1.8 3.3.9C4 4.8 3.4 1.9 5 -.6"/></svg>
+  </div>
+</footer>
+
+<script>
+  const burgerBtn = document.getElementById('burgerBtn');
+  const mobileNav = document.getElementById('mobileNav');
+  const mobileOverlay = document.getElementById('mobileOverlay');
+  const mobileNavClose = document.getElementById('mobileNavClose');
+
+  function openMobileNav(){
+    mobileNav.classList.add('open');
+    mobileOverlay.classList.add('open');
+    burgerBtn.setAttribute('aria-expanded','true');
+  }
+  function closeMobileNav(){
+    mobileNav.classList.remove('open');
+    mobileOverlay.classList.remove('open');
+    burgerBtn.setAttribute('aria-expanded','false');
+  }
+
+  burgerBtn.addEventListener('click', openMobileNav);
+  mobileNavClose.addEventListener('click', closeMobileNav);
+  mobileOverlay.addEventListener('click', closeMobileNav);
+  document.querySelectorAll('.mobile-nav a').forEach(a => a.addEventListener('click', closeMobileNav));
+</script>
+</body>
+</html>
